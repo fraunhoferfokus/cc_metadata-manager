@@ -1,0 +1,230 @@
+"use strict";
+/* -----------------------------------------------------------------------------
+ *  Copyright (c) 2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <https://www.gnu.org/licenses/>.  
+ *
+ *  No Patent Rights, Trademark Rights and/or other Intellectual Property
+ *  Rights other than the rights under this license are granted.
+ *  All other rights reserved.
+ *
+ *  For any other rights, a separate agreement needs to be closed.
+ *
+ *  For more information please contact:  
+ *  Fraunhofer FOKUS
+ *  Kaiserin-Augusta-Allee 31
+ *  10589 Berlin, Germany
+ *  https://www.fokus.fraunhofer.de/go/fame
+ *  famecontact@fokus.fraunhofer.de
+ * -----------------------------------------------------------------------------
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const axios_1 = __importDefault(require("axios"));
+const ajv_1 = __importDefault(require("ajv"));
+const ajv_formats_1 = __importDefault(require("ajv-formats"));
+const BiLoProductLaunchMetadataQueryModel_1 = __importDefault(require("../models/BiLoProductLaunchMetadata/BiLoProductLaunchMetadataQueryModel"));
+const BiLoProductLaunchMetadataQuerySchema_1 = __importDefault(require("../models/BiLoProductLaunchMetadata/BiLoProductLaunchMetadataQuerySchema"));
+const MetadataQueryModel_1 = __importDefault(require("../models/Metadata/MetadataQueryModel"));
+const LAUNCH_METADATA_PROVIDER_API_PROTOCOL = (process.env.LAUNCH_METADATA_PROVIDER_API_PROTOCOL) ? process.env.LAUNCH_METADATA_PROVIDER_API_PROTOCOL : 'http';
+const LAUNCH_METADATA_PROVIDER_API_HOST = (process.env.LAUNCH_METADATA_PROVIDER_API_HOST) ? process.env.LAUNCH_METADATA_PROVIDER_API_HOST : '127.0.0.1';
+const LAUNCH_METADATA_PROVIDER_API_PORT = (process.env.LAUNCH_METADATA_PROVIDER_API_PORT) ? parseInt(process.env.LAUNCH_METADATA_PROVIDER_API_PORT) : 3041;
+const LAUNCH_METADATA_PROVIDER_API_BASE_PATH = (process.env.LAUNCH_METADATA_PROVIDER_API_BASE_PATH)
+    ? (process.env.LAUNCH_METADATA_PROVIDER_API_BASE_PATH.indexOf('/') == 0)
+        ? process.env.LAUNCH_METADATA_PROVIDER_API_BASE_PATH
+        : '/' + process.env.LAUNCH_METADATA_PROVIDER_API_BASE_PATH
+    : '';
+const LAUNCH_METADATA_PROVIDER_API = LAUNCH_METADATA_PROVIDER_API_PROTOCOL + '://' + LAUNCH_METADATA_PROVIDER_API_HOST + ':' + LAUNCH_METADATA_PROVIDER_API_PORT + LAUNCH_METADATA_PROVIDER_API_BASE_PATH;
+const AJV = new ajv_1.default({
+    strict: false
+});
+(0, ajv_formats_1.default)(AJV);
+const VALIDATE_LAUNCH = AJV.compile(BiLoProductLaunchMetadataQuerySchema_1.default);
+const DEFAULT = {
+    LANGSTRING: {
+        language: 'x-none',
+    },
+    STRUCTURE: {
+        source: 'LOMv1.0',
+        value: 'atomic',
+    },
+    AGGREGATIONLEVEL: {
+        source: 'LOMv1.0',
+        value: '1',
+    },
+};
+class BiLoTransformator {
+    constructor(data) {
+        this.biloMetadataQuery = data;
+    }
+    getGeneral() {
+        if (this.biloMetadataQuery.data) {
+            let general = {
+                identifier: this.biloMetadataQuery.data.id,
+                title: {
+                    '@_xml:lang': DEFAULT.LANGSTRING.language,
+                    value: this.biloMetadataQuery.data.title,
+                },
+                catalogentry: [
+                    {
+                        catalog: this.biloMetadataQuery.data.publisher,
+                        entry: this.biloMetadataQuery.data.id,
+                    },
+                ],
+                description: [
+                    {
+                        '@_xml:lang': DEFAULT.LANGSTRING.language,
+                        value: this.biloMetadataQuery.data.description,
+                    },
+                ],
+                structure: {
+                    source: {
+                        '@_xml:lang': DEFAULT.LANGSTRING.language,
+                        value: DEFAULT.STRUCTURE.source,
+                    },
+                    value: {
+                        '@_xml:lang': DEFAULT.LANGSTRING.language,
+                        value: DEFAULT.STRUCTURE.value,
+                    },
+                },
+                aggregationlevel: {
+                    source: {
+                        '@_xml:lang': DEFAULT.LANGSTRING.language,
+                        value: DEFAULT.AGGREGATIONLEVEL.source,
+                    },
+                    value: {
+                        '@_xml:lang': DEFAULT.LANGSTRING.language,
+                        value: DEFAULT.AGGREGATIONLEVEL.value,
+                    },
+                },
+            };
+            return general;
+        }
+        return undefined;
+    }
+    getTechnical() {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            if (this.biloMetadataQuery.data) {
+                let technical = {};
+                yield axios_1.default.get(`${LAUNCH_METADATA_PROVIDER_API}/${this.biloMetadataQuery.query.id}`)
+                    .then(function (request_product_launch_metadata_response) {
+                    const request_product_launch_metadata_response_data = request_product_launch_metadata_response.data;
+                    if (VALIDATE_LAUNCH(request_product_launch_metadata_response_data)) {
+                        const biloProductLaunchMetaDataQueryObj = new BiLoProductLaunchMetadataQueryModel_1.default(request_product_launch_metadata_response_data);
+                        if (biloProductLaunchMetaDataQueryObj.data) {
+                            technical.location = [
+                                biloProductLaunchMetaDataQueryObj.data.href
+                            ];
+                        }
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                    resolve(technical);
+                })
+                    .catch(function (request_product_launch_metadata_response_error) {
+                    resolve(undefined);
+                });
+            }
+            else {
+                resolve(undefined);
+            }
+        }));
+    }
+    getAnnotations() {
+        var _a, _b, _c, _d;
+        if (this.biloMetadataQuery.data) {
+            let annotations = [];
+            if ((_a = this.biloMetadataQuery.data.cover) === null || _a === void 0 ? void 0 : _a.href) {
+                let annotation_cover = {
+                    description: {
+                        '@_xml:lang': 'cover',
+                        value: (_b = this.biloMetadataQuery.data.cover) === null || _b === void 0 ? void 0 : _b.href,
+                    },
+                };
+                annotations.push(annotation_cover);
+            }
+            if ((_c = this.biloMetadataQuery.data.coverSmall) === null || _c === void 0 ? void 0 : _c.href) {
+                let annotation_cover_small = {
+                    description: {
+                        '@_xml:lang': 'coverSmall',
+                        value: (_d = this.biloMetadataQuery.data.coverSmall) === null || _d === void 0 ? void 0 : _d.href,
+                    },
+                };
+                annotations.push(annotation_cover_small);
+            }
+            return annotations;
+        }
+        return undefined;
+    }
+    toMetadata() {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let metadata = {
+                    lom: {},
+                };
+                if (this.biloMetadataQuery.data) {
+                    metadata.lom = {
+                        general: this.getGeneral(),
+                        annotation: this.getAnnotations(),
+                    };
+                    let technical = yield this.getTechnical();
+                    if (technical) {
+                        metadata.lom.technical = technical;
+                    }
+                }
+                resolve(metadata);
+            }
+            catch (err) {
+                resolve(undefined);
+            }
+        }));
+    }
+    toMetadataQuery() {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let metadataQuery = new MetadataQueryModel_1.default({
+                    query: this.biloMetadataQuery.query,
+                    status: this.biloMetadataQuery.status,
+                });
+                if (this.biloMetadataQuery.data) {
+                    let metadata = {
+                        lom: {
+                            general: this.getGeneral(),
+                            annotation: this.getAnnotations(),
+                        }
+                    };
+                    metadataQuery.data = metadata;
+                }
+                resolve(metadataQuery);
+            }
+            catch (err) {
+                resolve(undefined);
+            }
+        }));
+    }
+}
+exports.default = BiLoTransformator;

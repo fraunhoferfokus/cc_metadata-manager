@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "rootDir": "./app/",
+        "outDir": "./dist",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "strictNullChecks": true
+    }
+}

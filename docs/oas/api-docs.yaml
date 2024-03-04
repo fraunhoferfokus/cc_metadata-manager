@@ -1,0 +1,655 @@
+openapi: 3.0.0
+info:
+  title: metadata-manager
+  description: ""
+  version: 0.0.1
+paths:
+  /ping:
+    get:
+      description: Request Server heartbeat
+      tags:
+        - Info
+      responses:
+        "200":
+          description: Returns a heartbeat object.
+  /info:
+    get:
+      description: Request info (e.g. JSON-schema)
+      tags:
+        - Info
+      responses:
+        "200":
+          description: Returns info (e.g. JSON-schema).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MetadataQuery"
+  /getMetadataById:
+    get:
+      description: Request Metadata by Product-Ids
+      tags:
+        - Metadata
+      produces:
+        - application/json
+        - text/xml
+      parameters:
+        - in: query
+          name: product_id
+          description: Product-Id
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            collectionFormat: multi
+        - in: query
+          name: schema
+          description: Schema URN
+          required: false
+          schema:
+            type: string
+            enum:
+              - urn:bilo:metadata
+              - urn:1edtech:metadata:v1p2p1
+      responses:
+        "200":
+          description: Returns a list of Metadata-query objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/MetadataQuery"
+                    - $ref: "#/components/schemas/BiLoMetadataQuery"
+            text/xml:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/MetadataQuery"
+                    - $ref: "#/components/schemas/BiLoMetadataQuery"
+        "400":
+          description: Bad Request.
+        "406":
+          description: Not Acceptable.
+        "500":
+          description: Internal Server Error.
+  "/{product_id}":
+    get:
+      description: Request Metadata by Product-Id
+      tags:
+        - Metadata
+      produces:
+        - application/json
+        - text/xml
+      parameters:
+        - in: path
+          name: product_id
+          description: Product-Id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: schema
+          description: Schema URN
+          required: false
+          schema:
+            type: string
+            enum:
+              - urn:bilo:metadata
+              - urn:1edtech:metadata:v1p2p1
+      responses:
+        "200":
+          description: OK - Returns a Metadata-query object.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MetadataQuery"
+                  - $ref: "#/components/schemas/BiLoMetadataQuery"
+            text/xml:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MetadataQuery"
+                  - $ref: "#/components/schemas/BiLoMetadataQuery"
+        "400":
+          description: Bad Request.
+        "406":
+          description: Not Acceptable.
+        "500":
+          description: Internal Server Error.
+  /:
+    get:
+      description: Request List of Metadata
+      tags:
+        - Metadata
+      produces:
+        - application/json
+        - text/xml
+      parameters:
+        - in: query
+          name: schema
+          description: Schema URN
+          required: false
+          schema:
+            type: string
+            enum:
+              - urn:bilo:metadata
+              - urn:1edtech:metadata:v1p2p1
+      responses:
+        "200":
+          description: Returns a list of Metadata-query objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/MetadataQuery"
+                    - $ref: "#/components/schemas/BiLoMetadataQuery"
+            text/xml:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/MetadataQuery"
+                    - $ref: "#/components/schemas/BiLoMetadataQuery"
+        "400":
+          description: Bad Request.
+        "406":
+          description: Not Acceptable.
+        "500":
+          description: Internal Server Error.
+components:
+  schemas:
+    BiLoMetadata:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - author
+        - publisher
+        - modified
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        publisher:
+          type: string
+        cover:
+          $ref: "#/components/schemas/BiLoResource"
+        coverSmall:
+          $ref: "#/components/schemas/BiLoResource"
+        modified:
+          type: number
+      xml:
+        name: BiLoMetadata
+      additionalProperties: false
+    BiLoResource:
+      type: object
+      required:
+        - href
+        - rel
+      properties:
+        href:
+          type: string
+        rel:
+          type: string
+      xml:
+        name: Resource
+    BiLoMetadataQuery:
+      type: object
+      required:
+        - query
+        - status
+      properties:
+        query:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+        status:
+          type: number
+        data:
+          $ref: "#/components/schemas/BiLoMetadata"
+      xml:
+        name: BiLoMetadataQuery
+      additionalProperties: false
+    BiLoProductLaunchMetadata:
+      type: object
+      required:
+        - id
+        - href
+        - modified
+      properties:
+        id:
+          type: string
+        href:
+          type: string
+        modified:
+          type: number
+      xml:
+        name: BiLoProductLaunchMetadata
+      additionalProperties: false
+    BiLoProductLaunchMetadataQuery:
+      type: object
+      required:
+        - query
+        - status
+      properties:
+        query:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+        status:
+          type: number
+        data:
+          $ref: "#/components/schemas/iBiLoProductLaunchMetadata"
+      xml:
+        name: BiLoProductLaunchMetadataQuery
+      additionalProperties: false
+    Metadata:
+      type: object
+      required:
+        - lom
+      properties:
+        lom:
+          type: object
+          properties:
+            general:
+              $ref: "#/components/schemas/General"
+            lifecycle:
+              $ref: "#/components/schemas/LifeCycle"
+            metametadata:
+              $ref: "#/components/schemas/MetaMetadata"
+            technical:
+              $ref: "#/components/schemas/Technical"
+            educational:
+              $ref: "#/components/schemas/Educational"
+            rights:
+              $ref: "#/components/schemas/Rights"
+            relation:
+              $ref: "#/components/schemas/Relation"
+            annotation:
+              $ref: "#/components/schemas/Annotation"
+            classification:
+              $ref: "#/components/schemas/Classification"
+      xml:
+        name: Metadata
+      additionalProperties: false
+    LangString:
+      type: object
+      required:
+        - "@_xml:lang"
+        - value
+      properties:
+        "@_xml:lang":
+          type: string
+          maxLength: 100
+        value:
+          type: string
+          maxLength: 2000
+      xml:
+        name: LangString
+    LangStringArray:
+      type: array
+      items:
+        type: object
+        required:
+          - "@_xml:lang"
+          - value
+        properties:
+          "@_xml:lang":
+            type: string
+            maxLength: 100
+          value:
+            type: string
+            maxLength: 2000
+      xml:
+        name: LangStringArray
+    DateType:
+      type: object
+      required:
+        - datetime
+        - description
+      properties:
+        datetime:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+      xml:
+        name: DateType
+    CatalogEntry:
+      type: object
+      required:
+        - catalog
+        - entry
+      properties:
+        catalog:
+          type: string
+        entry:
+          type: string
+      xml:
+        name: CatalogEntry
+    CatalogEntryArray:
+      type: array
+      items:
+        type: object
+        required:
+          - catalog
+          - entry
+        properties:
+          catalog:
+            type: string
+          entry:
+            type: string
+      xml:
+        name: CatalogEntryArray
+    StateVocabulary:
+      type: object
+      required:
+        - source
+        - value
+      properties:
+        source:
+          $ref: "#/components/schemas/LangString"
+        value:
+          $ref: "#/components/schemas/LangString"
+      xml:
+        name: StateVocabulary
+    StateVocabularyArray:
+      type: array
+      items:
+        type: object
+        required:
+          - source
+          - value
+        properties:
+          source:
+            $ref: "#/components/schemas/LangString"
+          value:
+            $ref: "#/components/schemas/LangString"
+      xml:
+        name: StateVocabularyArray
+    EnumeratedVocabulary:
+      type: object
+      required:
+        - source
+        - value
+      properties:
+        source:
+          $ref: "#/components/schemas/LangString"
+        value:
+          $ref: "#/components/schemas/LangString"
+      xml:
+        name: EnumeratedVocabulary
+    Contribute:
+      type: array
+      items:
+        type: object
+        properties:
+          role:
+            $ref: "#/components/schemas/StateVocabulary"
+          entity:
+            type: array
+            items:
+              type: string
+          date:
+            $ref: "#/components/schemas/DateType"
+      xml:
+        name: Contribute
+    Composite:
+      type: array
+      items:
+        type: object
+        properties:
+          type:
+            $ref: "#/components/schemas/StateVocabulary"
+          name:
+            $ref: "#/components/schemas/StateVocabulary"
+          minimumversion:
+            type: string
+          maximumversion:
+            type: string
+      xml:
+        name: Composite
+    Requirement:
+      type: array
+      items:
+        type: object
+        properties:
+          orcomposite:
+            $ref: "#/components/schemas/Composite"
+      xml:
+        name: Requirement
+    Resource:
+      type: object
+      properties:
+        identifier:
+          type: string
+        description:
+          $ref: "#/components/schemas/LangStringArray"
+        catalogentry:
+          $ref: "#/components/schemas/CatalogEntryArray"
+      xml:
+        name: Resource
+    Taxon:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            maxLength: 100
+          entry:
+            $ref: "#/components/schemas/LangString"
+      xml:
+        name: Taxon
+    Taxonpath:
+      type: array
+      items:
+        type: object
+        properties:
+          source:
+            $ref: "#/components/schemas/LangString"
+          taxon:
+            $ref: "#/components/schemas/Taxon"
+      xml:
+        name: Taxonpath
+    General:
+      type: object
+      required:
+        - Structure
+        - AggregationLevel
+      properties:
+        identifier:
+          type: string
+        title:
+          $ref: "#/components/schemas/LangString"
+        catalogentry:
+          $ref: "#/components/schemas/CatalogEntryArray"
+        language:
+          type: array
+          items:
+            type: string
+        description:
+          $ref: "#/components/schemas/LangStringArray"
+        keyword:
+          $ref: "#/components/schemas/LangStringArray"
+        coverage:
+          $ref: "#/components/schemas/LangStringArray"
+        structure:
+          $ref: "#/components/schemas/StateVocabulary"
+        aggregationLevel:
+          $ref: "#/components/schemas/EnumeratedVocabulary"
+      xml:
+        name: General
+    LifeCycle:
+      type: object
+      properties:
+        version:
+          $ref: "#/components/schemas/LangString"
+        status:
+          $ref: "#/components/schemas/StateVocabulary"
+        contribute:
+          $ref: "#/components/schemas/Contribute"
+      xml:
+        name: LifeCycle
+    MetaMetadata:
+      type: object
+      properties:
+        identifier:
+          type: string
+        catalogentry:
+          $ref: "#/components/schemas/CatalogEntryArray"
+        contribute:
+          $ref: "#/components/schemas/Contribute"
+        metadataschema:
+          type: array
+          items:
+            type: string
+        language:
+          type: string
+      xml:
+        name: MetaMetadata
+    Technical:
+      type: object
+      properties:
+        format:
+          type: array
+          items:
+            type: string
+        size:
+          type: string
+        location:
+          type: array
+          items:
+            type: string
+        requirement:
+          $ref: "#/components/schemas/Requirement"
+        installationremarks:
+          $ref: "#/components/schemas/LangString"
+        otherplatformrequirements:
+          $ref: "#/components/schemas/LangString"
+        duration:
+          $ref: "#/components/schemas/DateType"
+      xml:
+        name: Technical
+    Educational:
+      type: array
+      items:
+        type: object
+        properties:
+          interactivitytype:
+            $ref: "#/components/schemas/StateVocabulary"
+          learningresourcetype:
+            $ref: "#/components/schemas/StateVocabularyArray"
+          interactivitylevel:
+            $ref: "#/components/schemas/EnumeratedVocabulary"
+          semanticdensity:
+            $ref: "#/components/schemas/EnumeratedVocabulary"
+          intendedenduserrole:
+            $ref: "#/components/schemas/StateVocabularyArray"
+          context:
+            $ref: "#/components/schemas/StateVocabularyArray"
+          typicalagerange:
+            $ref: "#/components/schemas/LangStringArray"
+          difficulty:
+            $ref: "#/components/schemas/EnumeratedVocabulary"
+          typicallearningtime:
+            $ref: "#/components/schemas/DateType"
+          description:
+            $ref: "#/components/schemas/LangString"
+          language:
+            type: array
+            items:
+              type: string
+      xml:
+        name: Educational
+    Rights:
+      type: object
+      properties:
+        cost:
+          $ref: "#/components/schemas/StateVocabulary"
+        copyrightandotherrestrictions:
+          $ref: "#/components/schemas/StateVocabulary"
+        description:
+          $ref: "#/components/schemas/LangString"
+      xml:
+        name: Rights
+    Relation:
+      type: array
+      items:
+        type: object
+        properties:
+          kind:
+            $ref: "#/components/schemas/StateVocabulary"
+          resourc:
+            $ref: "#/components/schemas/Resource"
+      xml:
+        name: Relation
+    Annotation:
+      type: array
+      items:
+        type: object
+        properties:
+          person:
+            type: string
+          date:
+            $ref: "#/components/schemas/DateType"
+          description:
+            $ref: "#/components/schemas/LangString"
+      xml:
+        name: Annotation
+    Classification:
+      type: array
+      items:
+        type: object
+        properties:
+          purpose:
+            $ref: "#/components/schemas/StateVocabulary"
+          taxonpath:
+            $ref: "#/components/schemas/Taxonpath"
+          description:
+            $ref: "#/components/schemas/LangString"
+          keyword:
+            $ref: "#/components/schemas/LangStringArray"
+      xml:
+        name: Classification
+    MetadataQuery:
+      type: object
+      required:
+        - query
+        - status
+      properties:
+        query:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+        status:
+          type: number
+        data:
+          $ref: "#/components/schemas/Metadata"
+      xml:
+        name: MetadataQuery
+      additionalProperties: false
+tags: []
