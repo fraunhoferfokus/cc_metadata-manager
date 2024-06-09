@@ -11,7 +11,7 @@ Acts as a proxy server, allowing product metadata providers (publishers) to regi
 * MariaDB Version 10x
 * Redis Version 6x
 * Node.js Version 20x
-* [BiLo](https://info.bildungslogin.de/) (OIDC) authentication service credentials for extracting license informations
+* [BILDUNGSLOGIN](https://info.bildungslogin.de/) (OIDC) authentication service credentials for extracting license informations
 
 # Quick Start:
 
@@ -41,10 +41,10 @@ The following table gives an overview of the settings you can change through the
 | `LAUNCH_METADATA_PROVIDER_API_HOST`             | `127.0.0.1`                                            | Yes               | The host address for the product launch metadata provider API.                                                        |
 | `LAUNCH_METADATA_PROVIDER_API_PORT`             | `3043`                                                 | Yes               | The port on which the product launch metadata provider API is running.                                                |
 | `LAUNCH_METADATA_PROVIDER_API_BASE_PATH`        | `/services/productLaunchMetadata`                       | Yes               | The base path for the product launch metadata provider API's endpoints.                                               |
-| `METADATA_BILO_API`                             |                                                        | No                | The API endpoint for BILO metadata operations.                                                                        |
-| `OIDC_AUTH_BILO_ENDPOINT`                       |                                                        | Yes               | The authentication endpoint for OIDC BILO.                                                                            |
-| `OIDC_BILO_CLIENT_ID`                           |                                                        | Yes               | The client ID for OIDC BILO authentication.                                                                           |
-| `OIDC_BILO_CLIENT_SECRET`                       |                                                        | Yes               | The client secret for OIDC BILO authentication.                                                                       |
+| `METADATA_BILO_API`                             |                                                        | No                | The API endpoint for BILDUNGSLOGIN metadata operations.                                                                        |
+| `OIDC_AUTH_BILO_ENDPOINT`                       |                                                        | Yes               | The authentication endpoint for OIDC BILDUNGSLOGIN.                                                                            |
+| `OIDC_BILO_CLIENT_ID`                           |                                                        | Yes               | The client ID for OIDC BILDUNGSLOGIN authentication.                                                                           |
+| `OIDC_BILO_CLIENT_SECRET`                       |                                                        | Yes               | The client secret for OIDC BILDUNGSLOGIN authentication.                                                                       |
 
 
 Afterward just startup the server with following command:
