@@ -7,11 +7,16 @@ Product metadata component for collecting and providing product metadata accordi
 
 Acts as a proxy server, allowing product metadata providers (publishers) to register with the component. When product metadata is requested by the license management, the component forwards it to the appropriate endpoint. Via plugin: Allows the translation of BiLo product metadata into IMS Metadata (LOM, v1.2.1).
 
+# Dependencies
+## Metadata Service
+* To be able to import Metadata Information from BILDUNGSLOGIN, relevant service credentials are required. These are required to query the corresponding API. More details: partners/BILDUNGSLOGIN.md
+## Service Authentication
+* To be able to authorize license imports, relevant service credentuals are required. More details: partners/N21.md
+
 # Requirements:
 * MariaDB Version 10x
 * Redis Version 6x
 * Node.js Version 20x
-* [BILDUNGSLOGIN](https://info.bildungslogin.de/) (OIDC) authentication service credentials for extracting license informations
 
 # Quick Start:
 
