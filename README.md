@@ -9,9 +9,9 @@ Acts as a proxy server, allowing product metadata providers (publishers) to regi
 
 # Dependencies
 ## Metadata Service
-* To be able to import Metadata Information from BILDUNGSLOGIN, relevant service credentials are required. These are required to query the corresponding API. More details: partners/BILDUNGSLOGIN.md
+* To be able to import Metadata Information from BILDUNGSLOGIN, relevant service credentials are required. These are required to query the corresponding API. More details: [partners/BILDUNGSLOGIN.md](./partners/BILDUNGSLOGIN.md)
 ## Service Authentication
-* To be able to authorize license imports, relevant service credentuals are required. More details: partners/N21.md
+* To be able to authorize license imports, relevant service credentuals are required. More details: [partners/n-21.md](./partners/n-21.md)
 
 # Requirements:
 * MariaDB Version 10x
